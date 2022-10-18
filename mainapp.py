@@ -110,4 +110,4 @@ from explainerdashboard import ExplainerDashboard
 ExplainerDashboard(explainer).run()
 
 import streamlit.components.v1 as components
-components.iframe("http://192.168.1.62:8501")
+components.iframe("https://explanair-dashboard.herokuapp.com/dashboard")
