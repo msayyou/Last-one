@@ -1,6 +1,9 @@
+import pickle
+# See PyCharm help at https://www.jetbrains.com/help/pycharm/
 import pandas as pd
+# See PyCharm help at https://www.jetbrains.com/help/pycharm/
 import streamlit as st
-import joblib
+import shap
 
 st.title('Scoring Credit App')
 
@@ -9,7 +12,6 @@ st.sidebar.header("the  parameters of the client")
 
 def client_parameters_enter():
     CODE_GENDER = st.sidebar.selectbox('CODE_GENDER', ('M', 'F'))
-    EXT_SOURCE_3 = st.sidebar.slider('EXT_SOURCE_3', 0.00, 1.00, 0.01)
     EMERGENCYSTATE_MODE = st.sidebar.selectbox('EMERGENCYSTATE_MODE', ('No', 'Yes'))
     OCCUPATION_TYPE = st.sidebar.selectbox('OCCUPATION_TYPE', ('Laborers', 'Drivers', 'Sales staff', 'Cleaning',
                                                                'staff',
@@ -20,21 +22,21 @@ def client_parameters_enter():
                                                                'Secretaries', 'Low-skill Laborers', 'IT staff',
                                                                'Private service staff',
                                                                'HR staff', 'Waiters/barmen staff'))
-    NAME_INCOME_TYPE = st.sidebar.selectbox('NAME_INCOME_TYPE', ('Working', 'Commercial associate', 'State servant',
-                                                                 'Businessman', 'Student'))
-    NAME_EDUCATION_TYPE = st.sidebar.selectbox('NAME_EDUCATION_TYPE', ('Secondary / secondary special',
-                                                                       'Higher education',
-                                                                       'Incomplete higher', 'Lower secondary',
-                                                                       'Academic degree'))
     WALLSMATERIAL_MODE = st.sidebar.selectbox('WALLSMATERIAL_MODE', ('Stone, brick', 'Panel', 'Others',
                                                                      'Monolithic', 'Mixed', 'Wooden',
                                                                      'Block'))
+    EXT_SOURCE_3 = st.sidebar.slider('EXT_SOURCE_3', 0.00, 1.00, 0.01)
     REGION_RATING_CLIENT = st.sidebar.slider('REGION_RATING_CLIENT', 1, 3, 1)
+    AMT_GOODS_PRICE = st.sidebar.slider('AMT_GOODS_PRICE', 45000000000, 350000000000, 1000000)
+    GOODS_PRICE_CREDIT_PER = st.sidebar.slider('GOODS_PRICE_CREDIT_PER', 0.384615, 4.666667, 0.124305)
+    DAYS_WORKING_PER = st.sidebar.slider('DAYS_WORKING_PER', -37.743412, 0.717426, 0.022656)
+    ANNUITY_DAYS_BIRTH_PERC = st.sidebar.slider('ANNUITY_DAYS_BIRTH_PERC', -8.088154, -0.054627, 0.5)
 
     data = {'CODE_GENDER': CODE_GENDER, 'EXT_SOURCE_3': EXT_SOURCE_3, 'EMERGENCYSTATE_MODE': EMERGENCYSTATE_MODE,
-            'OCCUPATION_TYPE': OCCUPATION_TYPE, 'NAME_INCOME_TYPE': NAME_INCOME_TYPE,
-            'NAME_EDUCATION_TYPE': NAME_EDUCATION_TYPE, 'WALLSMATERIAL_MODE': WALLSMATERIAL_MODE,
-            'REGION_RATING_CLIENT': REGION_RATING_CLIENT}
+            'OCCUPATION_TYPE': OCCUPATION_TYPE, 'WALLSMATERIAL_MODE': WALLSMATERIAL_MODE,
+            'REGION_RATING_CLIENT': REGION_RATING_CLIENT, 'AMT_GOODS_PRICE': AMT_GOODS_PRICE,
+            'GOODS_PRICE_CREDIT_PER': GOODS_PRICE_CREDIT_PER, 'DAYS_WORKING_PER': DAYS_WORKING_PER,
+            'ANNUITY_DAYS_BIRTH_PERC': ANNUITY_DAYS_BIRTH_PERC}
 
     client_parameters = pd.DataFrame(data, index=[0])
     return client_parameters
@@ -50,8 +52,7 @@ df.drop('Unnamed: 0', axis=1, inplace=True)
 donnee_entree = pd.concat([input_df, df], axis=0)
 st.write(donnee_entree)
 
-var_cat = ['CODE_GENDER', 'EMERGENCYSTATE_MODE', 'OCCUPATION_TYPE',
-           'NAME_INCOME_TYPE', 'NAME_EDUCATION_TYPE', 'WALLSMATERIAL_MODE']
+var_cat = ['CODE_GENDER', 'EMERGENCYSTATE_MODE', 'OCCUPATION_TYPE', 'WALLSMATERIAL_MODE']
 
 for col in var_cat:
     dummy = pd.get_dummies(donnee_entree[col], drop_first=True)
@@ -63,21 +64,50 @@ donnee_entree = donnee_entree.fillna(donnee_entree.mode())
 donnee_entree = donnee_entree[:1]
 
 tableau_prevision = donnee_entree.drop(['TARGET'], axis=1)
-st.subheader('Les nouveaux parametres')
-st.write(tableau_prevision)
-
 X = donnee_entree.drop(['TARGET'], axis=1)
 y = donnee_entree['TARGET']
 
+st.subheader('Les nouveaux parametres')
+st.write(tableau_prevision)
+
 # importer le modèle
-load_model = joblib.load('predict_loan.pkl')
+load_model = pickle.load(open('predict_loan_GBC.pkl', 'rb'))
 
 # appliquer le modèle sur le profil d'entrée
 prevision = load_model.predict(tableau_prevision)
-prediction_proba = load_model.predict_proba(tableau_prevision)
+prevision_proba = load_model.predict_proba(tableau_prevision)
 
 st.subheader('Résultat de la prévision')
 st.write(y[prevision])
 
 st.subheader('prediction probability')
-st.write(prediction_proba)
+st.write(prevision_proba)
+
+prediction = load_model.predict(tableau_prevision)
+
+if st.button("Predict"):
+    prediction = load_model.predict(tableau_prevision)
+    if prediction[0] < 0.7:
+        st.success('Le demandeur a une forte probabilité de rembourser le prêt !')
+    else:
+        st.error('Le demandeur a un risque élevé de ne pas rembourser le prêt')
+
+st.title("SHAP in Streamlit")
+
+st.set_option('deprecation.showPyplotGlobalUse', False)
+st.subheader('Result Interpretability - Applicant Level')
+shap.initjs()
+explainer = shap.Explainer(load_model)
+shap_values = explainer(X)
+fig = shap.plots.bar(shap_values[0])
+st.pyplot(fig)
+
+
+from explainerdashboard import ClassifierExplainer
+explainer = ClassifierExplainer(load_model, X, y)
+
+from explainerdashboard import ExplainerDashboard
+ExplainerDashboard(explainer).run()
+
+import streamlit.components.v1 as components
+components.iframe("http://192.168.1.62:8501")
