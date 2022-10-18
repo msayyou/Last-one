@@ -102,5 +102,15 @@ shap_values = explainer(X)
 fig = shap.plots.bar(shap_values[0])
 st.pyplot(fig)
 
+from explainerdashboard import ClassifierExplainer 
+explainer = ClassifierExplainer(load_model, X, y) 
+
+from explainerdashboard import ExplainerDashboard 
+ExplainerDashboard(explainer).run() 
+
+import streamlit.components.v1 as components 
+components.iframe("https://explanair-dashboard.herokuapp.com/dashboard") 
+
+ 
 
 
