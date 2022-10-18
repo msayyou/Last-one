@@ -104,5 +104,3 @@ st.pyplot(fig)
 
 
 
-import streamlit.components.v1 as components
-components.iframe("https://explanair-dashboard.herokuapp.com/dashboard")
