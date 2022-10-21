@@ -1,9 +1,10 @@
-import pickle
+import joblib
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 import pandas as pd
+import shap
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 import streamlit as st
-import shap
+from sklearn.model_selection import train_test_split
 
 st.title('Scoring Credit App')
 
@@ -70,12 +71,18 @@ y = donnee_entree['TARGET']
 st.subheader('Les nouveaux parametres')
 st.write(tableau_prevision)
 
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.65, test_size=0.25, stratify=y, random_state=4)
+
+GBC = GradientBoostingClassifier(learning_rate=0.017794191838477483, n_estimators=600,
+                                 subsample=0.6159921598038572)
+model = GBC
+model.fit(X_train, y_train)
 # importer le modèle
-load_model = pickle.load(open('predict_loan_GBC.pkl', 'rb'))
+load_model = joblib.load('predict_loan_GBC.pkl')
 
 # appliquer le modèle sur le profil d'entrée
-prevision = load_model.predict(tableau_prevision)
-prevision_proba = load_model.predict_proba(tableau_prevision)
+prevision = model.predict(tableau_prevision)
+prevision_proba = model.predict_proba(tableau_prevision)
 
 st.subheader('Résultat de la prévision')
 st.write(y[prevision])
@@ -83,7 +90,7 @@ st.write(y[prevision])
 st.subheader('prediction probability')
 st.write(prevision_proba)
 
-prediction = load_model.predict(tableau_prevision)
+prediction = model.predict(tableau_prevision)
 
 if st.button("Predict"):
     prediction = load_model.predict(tableau_prevision)
@@ -102,15 +109,15 @@ shap_values = explainer(X)
 fig = shap.plots.bar(shap_values[0])
 st.pyplot(fig)
 
-from explainerdashboard import ClassifierExplainer 
-explainer = ClassifierExplainer(load_model, X, y) 
+from explainerdashboard import ClassifierExplainer
 
-from explainerdashboard import ExplainerDashboard 
-ExplainerDashboard(explainer).run() 
+explainer = ClassifierExplainer(model, X_test, y_test)
 
-import streamlit.components.v1 as components 
-components.iframe("https://explanair-dashboard.herokuapp.com/dashboard") 
+from explainerdashboard import ExplainerDashboard
 
- 
+db = ExplainerDashboard(explainer)
+db.run(port=8052)
 
+import streamlit.components.v1 as components
 
+components.iframe("http://192.168.1.62:8502")
