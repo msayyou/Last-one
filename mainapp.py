@@ -73,12 +73,9 @@ st.write(tableau_prevision)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.65, test_size=0.25, stratify=y, random_state=4)
 
-GBC = GradientBoostingClassifier(learning_rate=0.017794191838477483, n_estimators=600,
-                                 subsample=0.6159921598038572)
-model = GBC
-model.fit(X_train, y_train)
+
 # importer le modèle
-load_model = joblib.load('predict_loan_GBC.pkl')
+model = joblib.load('predict_loan_GBC.pkl')
 
 # appliquer le modèle sur le profil d'entrée
 prevision = model.predict(tableau_prevision)
@@ -109,15 +106,3 @@ shap_values = explainer(X)
 fig = shap.plots.bar(shap_values[0])
 st.pyplot(fig)
 
-from explainerdashboard import ClassifierExplainer
-
-explainer = ClassifierExplainer(model, X_test, y_test)
-
-from explainerdashboard import ExplainerDashboard
-
-db = ExplainerDashboard(explainer)
-db.run(port=8052)
-
-import streamlit.components.v1 as components
-
-components.iframe("http://192.168.1.62:8502")
