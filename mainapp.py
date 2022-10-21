@@ -90,7 +90,7 @@ st.write(prevision_proba)
 prediction = model.predict(tableau_prevision)
 
 if st.button("Predict"):
-    prediction = load_model.predict(tableau_prevision)
+    prediction = model.predict(tableau_prevision)
     if prediction[0] < 0.7:
         st.success('Le demandeur a une forte probabilité de rembourser le prêt !')
     else:
@@ -101,7 +101,7 @@ st.title("SHAP in Streamlit")
 st.set_option('deprecation.showPyplotGlobalUse', False)
 st.subheader('Result Interpretability - Applicant Level')
 shap.initjs()
-explainer = shap.Explainer(load_model)
+explainer = shap.Explainer(model)
 shap_values = explainer(X)
 fig = shap.plots.bar(shap_values[0])
 st.pyplot(fig)
