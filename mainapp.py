@@ -70,9 +70,7 @@ y = donnee_entree['TARGET']
 
 st.subheader('Les nouveaux parametres')
 st.write(tableau_prevision)
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.65, test_size=0.25, stratify=y, random_state=4)
-
+from sklearn.ensemble import GradientBoostingClassifier
 
 # importer le modèle
 model = joblib.load('predict_loan_GBC.pkl')
@@ -91,7 +89,7 @@ prediction = model.predict(tableau_prevision)
 
 if st.button("Predict"):
     prediction = model.predict(tableau_prevision)
-    if prediction[0] < 0.7:
+    if prediction[0] < 0.5:
         st.success('Le demandeur a une forte probabilité de rembourser le prêt !')
     else:
         st.error('Le demandeur a un risque élevé de ne pas rembourser le prêt')
@@ -106,3 +104,6 @@ shap_values = explainer(X)
 fig = shap.plots.bar(shap_values[0])
 st.pyplot(fig)
 
+import streamlit.components.v1 as components
+
+components.iframe("http://192.168.1.108:8050/")
