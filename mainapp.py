@@ -104,6 +104,3 @@ shap_values = explainer(X)
 fig = shap.plots.bar(shap_values[0])
 st.pyplot(fig)
 
-import streamlit.components.v1 as components
-
-components.iframe("http://192.168.1.108:8050/")
