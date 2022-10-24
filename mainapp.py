@@ -4,7 +4,6 @@ import pandas as pd
 import shap
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 import streamlit as st
-from sklearn.model_selection import train_test_split
 
 st.title('Scoring Credit App')
 
@@ -14,21 +13,18 @@ st.sidebar.header("the  parameters of the client")
 def client_parameters_enter():
     CODE_GENDER = st.sidebar.selectbox('CODE_GENDER', ('M', 'F'))
     EMERGENCYSTATE_MODE = st.sidebar.selectbox('EMERGENCYSTATE_MODE', ('No', 'Yes'))
-    OCCUPATION_TYPE = st.sidebar.selectbox('OCCUPATION_TYPE', ('Laborers', 'Drivers', 'Sales staff', 'Cleaning',
-                                                               'staff',
-                                                               'Managers', 'Security staff', 'Accountants',
-                                                               'Core staff',
-                                                               'Realty agents', 'Medicine staff',
-                                                               'High skill tech staff', 'Cooking staff',
-                                                               'Secretaries', 'Low-skill Laborers', 'IT staff',
-                                                               'Private service staff',
-                                                               'HR staff', 'Waiters/barmen staff'))
-    WALLSMATERIAL_MODE = st.sidebar.selectbox('WALLSMATERIAL_MODE', ('Stone, brick', 'Panel', 'Others',
-                                                                     'Monolithic', 'Mixed', 'Wooden',
-                                                                     'Block'))
+    OCCUPATION_TYPE = st.sidebar.selectbox('OCCUPATION_TYPE',
+                                           ('Cleaning staff', 'Cooking staff', 'Core staff', 'Drivers',
+                                            'HR staff', 'High skill tech staff', 'IT staff',
+                                            'Laborers', 'Low-skill Laborers', 'Managers',
+                                            'Medicine staff ', 'Private service staff',
+                                            'Realty agents', 'Sales staff',
+                                            'Secretaries', 'Security staff', 'Waiters/barmen staff'))
+    WALLSMATERIAL_MODE = st.sidebar.selectbox('WALLSMATERIAL_MODE', ('Mixed', 'Monolithic', 'Others',
+                                                                     'Panel ', 'Stone, brick', 'Wooden'))
     EXT_SOURCE_3 = st.sidebar.slider('EXT_SOURCE_3', 0.00, 1.00, 0.01)
     REGION_RATING_CLIENT = st.sidebar.slider('REGION_RATING_CLIENT', 1, 3, 1)
-    AMT_GOODS_PRICE = st.sidebar.slider('AMT_GOODS_PRICE', 45000000000, 350000000000, 1000000)
+    AMT_GOODS_PRICE = st.sidebar.slider('AMT_GOODS_PRICE', 4500, 35000, 10000)
     GOODS_PRICE_CREDIT_PER = st.sidebar.slider('GOODS_PRICE_CREDIT_PER', 0.384615, 4.666667, 0.124305)
     DAYS_WORKING_PER = st.sidebar.slider('DAYS_WORKING_PER', -37.743412, 0.717426, 0.022656)
     ANNUITY_DAYS_BIRTH_PERC = st.sidebar.slider('ANNUITY_DAYS_BIRTH_PERC', -8.088154, -0.054627, 0.5)
@@ -70,7 +66,6 @@ y = donnee_entree['TARGET']
 
 st.subheader('Les nouveaux parametres')
 st.write(tableau_prevision)
-from sklearn.ensemble import GradientBoostingClassifier
 
 # importer le modèle
 model = joblib.load('predict_loan_GBC.pkl')
@@ -93,6 +88,17 @@ if st.button("Predict"):
         st.success('Le demandeur a une forte probabilité de rembourser le prêt !')
     else:
         st.error('Le demandeur a un risque élevé de ne pas rembourser le prêt')
+st.title("SHAP in Streamlit")
+
+st.set_option('deprecation.showPyplotGlobalUse', False)
+st.subheader('Result Interpretability - Applicant Level')
+shap.initjs()
+explainer = shap.Explainer(model)
+shap_values = explainer(X)
+fig = shap.plots.bar(shap_values[0])
+st.pyplot(fig)
+
+
 
 
 
