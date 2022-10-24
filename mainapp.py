@@ -94,13 +94,5 @@ if st.button("Predict"):
     else:
         st.error('Le demandeur a un risque élevé de ne pas rembourser le prêt')
 
-st.title("SHAP in Streamlit")
 
-st.set_option('deprecation.showPyplotGlobalUse', False)
-st.subheader('Result Interpretability - Applicant Level')
-shap.initjs()
-explainer = shap.Explainer(model)
-shap_values = explainer(X)
-fig = shap.plots.bar(shap_values[0])
-st.pyplot(fig)
 
