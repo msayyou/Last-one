@@ -105,4 +105,4 @@ explainer = ClassifierExplainer(model, X, y)
 explainer.dump("explainer.joblib")
 
 import streamlit.components.v1 as components
-st.components.v1.iframe("http://127.0.0.1:8050/", width=None, height=1500, scrolling=True)
+st.components.v1.iframe("https://msayyou-explainer-dashboard-openclassroom-main-34kvwp.streamlitapp.com/", width=None, height=1500, scrolling=True)
