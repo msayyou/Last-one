@@ -100,4 +100,4 @@ fig = shap.plots.bar(shap_values[0])
 st.pyplot(fig)
 
 import streamlit.components.v1 as components
-st.components.v1.iframe("https://msayyou-explainer-dashboard-openclassroom-main-34kvwp.streamlitapp.com/dashboard", width=None, height=1500, scrolling=True)
+st.components.v1.iframe("https://explanair-dashboard.herokuapp.com/dashboard", width=None, height=1500, scrolling=True)
