@@ -5,9 +5,9 @@ import shap
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 import streamlit as st
 
-st.title('Scoring Credit App')
+st.title('Implémentez un modèle de scoring')
 
-st.sidebar.header("the  parameters of the client")
+st.sidebar.header("Les paramètres des clinets")
 
 
 def client_parameters_enter():
@@ -41,7 +41,7 @@ def client_parameters_enter():
 
 input_df = client_parameters_enter()
 
-st.header('Deployment')
+st.header('Le déploiement')
 
 df = pd.read_csv('data_model.csv')
 df.drop('Unnamed: 0', axis=1, inplace=True)
@@ -88,17 +88,21 @@ if st.button("Predict"):
         st.success('Le demandeur a une forte probabilité de rembourser le prêt !')
     else:
         st.error('Le demandeur a un risque élevé de ne pas rembourser le prêt')
+
 st.title("SHAP in Streamlit")
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
-st.subheader('Result Interpretability - Applicant Level')
+st.subheader('Interprétabilité des résultats - Niveau candidat')
 shap.initjs()
 explainer = shap.Explainer(model)
 shap_values = explainer(X)
 fig = shap.plots.bar(shap_values[0])
 st.pyplot(fig)
 
+St.subheader('ExplainerDashboard')
+from explainerdashboard import ClassifierExplainer
+explainer = ClassifierExplainer(model, X, y)
+explainer.dump("explainer.joblib")
 
-
-
-
+import streamlit.components.v1 as components
+st.components.v1.iframe("http://127.0.0.1:8050/", width=None, height=1500, scrolling=True)
