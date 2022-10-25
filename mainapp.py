@@ -99,10 +99,5 @@ shap_values = explainer(X)
 fig = shap.plots.bar(shap_values[0])
 st.pyplot(fig)
 
-St.subheader('ExplainerDashboard')
-from explainerdashboard import ClassifierExplainer
-explainer = ClassifierExplainer(model, X, y)
-explainer.dump("explainer.joblib")
-
 import streamlit.components.v1 as components
 st.components.v1.iframe("https://msayyou-explainer-dashboard-openclassroom-main-34kvwp.streamlitapp.com/", width=None, height=1500, scrolling=True)
