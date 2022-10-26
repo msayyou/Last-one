@@ -47,7 +47,7 @@ df = pd.read_csv('data_model.csv')
 df.drop('Unnamed: 0', axis=1, inplace=True)
 
 donnee_entree = pd.concat([input_df, df], axis=0)
-st.write(donnee_entree)
+
 
 var_cat = ['CODE_GENDER', 'EMERGENCYSTATE_MODE', 'OCCUPATION_TYPE', 'WALLSMATERIAL_MODE']
 
