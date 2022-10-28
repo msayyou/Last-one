@@ -96,5 +96,16 @@ shap_values = explainer(X)
 fig = shap.plots.bar(shap_values[0])
 st.pyplot(fig)
 
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X)
+st.header('Feature Importance')
+fig = shap.summary_plot(shap_values, X)
+st.pyplot(fig)
+
+st.header('Features Interaction')
+shap_interaction_values = explainer.shap_interaction_values(X)
+fig = shap.summary_plot(shap_interaction_values, X, plot_type="bar")
+st.pyplot(fig)
+
 import streamlit.components.v1 as components
 st.components.v1.iframe("https://explanair-dashboard.herokuapp.com/dashboard", width=None, height=1500, scrolling=True)
