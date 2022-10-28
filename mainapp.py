@@ -4,10 +4,12 @@ import pandas as pd
 import shap
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 import streamlit as st
+from explainerdashboard import ClassifierExplainer
+import streamlit.components.v1 as components
 
 st.title('Implémentez un modèle de scoring')
 
-st.sidebar.header("Les paramètres des clinets")
+st.sidebar.header("Les paramètres client")
 
 
 def client_parameters_enter():
@@ -24,7 +26,7 @@ def client_parameters_enter():
                                                                      'Panel ', 'Stone, brick', 'Wooden'))
     EXT_SOURCE_3 = st.sidebar.slider('EXT_SOURCE_3', 0.00, 1.00, 0.01)
     REGION_RATING_CLIENT = st.sidebar.slider('REGION_RATING_CLIENT', 1, 3, 1)
-    AMT_GOODS_PRICE = st.sidebar.slider('AMT_GOODS_PRICE', 4500, 35000, 10000)
+    AMT_GOODS_PRICE = st.sidebar.slider('AMT_GOODS_PRICE', 45000, 350000, 10000)
     GOODS_PRICE_CREDIT_PER = st.sidebar.slider('GOODS_PRICE_CREDIT_PER', 0.384615, 4.666667, 0.124305)
     DAYS_WORKING_PER = st.sidebar.slider('DAYS_WORKING_PER', -37.743412, 0.717426, 0.022656)
     ANNUITY_DAYS_BIRTH_PERC = st.sidebar.slider('ANNUITY_DAYS_BIRTH_PERC', -8.088154, -0.054627, 0.5)
@@ -40,8 +42,6 @@ def client_parameters_enter():
 
 
 input_df = client_parameters_enter()
-
-st.header('Le déploiement')
 
 df = pd.read_csv('data_model.csv')
 df.drop('Unnamed: 0', axis=1, inplace=True)
@@ -64,7 +64,7 @@ tableau_prevision = donnee_entree.drop(['TARGET'], axis=1)
 X = donnee_entree.drop(['TARGET'], axis=1)
 y = donnee_entree['TARGET']
 
-st.subheader('Les nouveaux parametres')
+st.header('Le tableau des paramètres')
 st.write(tableau_prevision)
 
 # importer le modèle
@@ -74,25 +74,22 @@ model = joblib.load('predict_loan_GBC.pkl')
 prevision = model.predict(tableau_prevision)
 prevision_proba = model.predict_proba(tableau_prevision)
 
-st.subheader('Résultat de la prévision')
-st.write(y[prevision])
+st.header('Résultat')
+st.write(prevision)
 
-st.subheader('prediction probability')
+
+st.header('Probabilité')
 st.write(prevision_proba)
 
-prediction = model.predict(tableau_prevision)
-
-if st.button("Predict"):
+if st.button("Appuyer sur le boutton pour la décision"):
     prediction = model.predict(tableau_prevision)
     if prediction[0] < 0.5:
-        st.success('Le demandeur a une forte probabilité de rembourser le prêt !')
+        st.success('Le demandeur à une forte probabilité de rembourser le prêt !')
     else:
-        st.error('Le demandeur a un risque élevé de ne pas rembourser le prêt')
+        st.success('Le demandeur à un risque élevé de ne pas rembourser le prêt')
 
-st.title("SHAP in Streamlit")
-
+st.title("Interactif Features Importance  - Niveau client")
 st.set_option('deprecation.showPyplotGlobalUse', False)
-st.subheader('Interprétabilité des résultats - Niveau candidat')
 shap.initjs()
 explainer = shap.Explainer(model)
 shap_values = explainer(X)
