@@ -88,7 +88,7 @@ if st.button("Appuyer sur le boutton pour la décision"):
     else:
         st.success('Le demandeur à un risque élevé de ne pas rembourser le prêt')
 
-st.title("Interactif Features Importance  - Niveau client")
+st.title("Interactif Forces of Features Importance  - Niveau client")
 st.set_option('deprecation.showPyplotGlobalUse', False)
 shap.initjs()
 explainer = shap.Explainer(model)
@@ -107,5 +107,6 @@ shap_interaction_values = explainer.shap_interaction_values(X)
 fig = shap.summary_plot(shap_interaction_values, X, plot_type="bar")
 st.pyplot(fig)
 
+st.header('ExplainerDashboard')
 import streamlit.components.v1 as components
 st.components.v1.iframe("https://explanair-dashboard.herokuapp.com/dashboard", width=None, height=1500, scrolling=True)
