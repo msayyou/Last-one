@@ -28,7 +28,7 @@ dashboard:
     contributions: true
     whatif: true
     shap_dependence: true
-    shap_interaction: false
+    shap_interaction: true
     decision_trees: true
     kwargs: {}
     tabs: null
